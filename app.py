@@ -13,6 +13,7 @@ from pypdf import PdfReader
 MIN_LINE_LENGTH = 35
 SIMILARITY_THRESHOLD = 0.72
 HIGHLIGHT_WORD_LENGTH = 5
+MIN_MATCHED_WORDS = 3
 
 
 def apply_styles():
@@ -295,6 +296,40 @@ def apply_styles():
                 padding: 0.25rem 0.55rem;
             }
 
+            .evidence-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.4rem;
+                margin-top: 0.65rem;
+            }
+
+            .word-chip {
+                background: rgba(251, 113, 133, 0.18);
+                border: 1px solid rgba(251, 113, 133, 0.42);
+                border-radius: 999px;
+                color: #fecdd3;
+                display: inline-block;
+                font-size: 0.78rem;
+                font-weight: 700;
+                padding: 0.22rem 0.5rem;
+            }
+
+            .source-location {
+                color: #94a3b8;
+                font-size: 0.86rem;
+                font-weight: 700;
+                margin-top: 0.5rem;
+            }
+
+            .search-note {
+                background: rgba(234, 179, 8, 0.12);
+                border: 1px solid rgba(234, 179, 8, 0.3);
+                border-radius: 8px;
+                color: #fde68a;
+                margin-top: 0.7rem;
+                padding: 0.75rem;
+            }
+
             .guide-panel {
                 animation: fadeUp 0.42s ease-out;
                 background: rgba(15, 23, 42, 0.78);
@@ -376,10 +411,16 @@ def important_words(text):
     }
 
 
-def highlight_source_snippet(line, snippet):
-    words = important_words(line)
+def matched_words(line, source_text):
+    line_words = important_words(line)
+    source_words = important_words(source_text)
+    return sorted(line_words.intersection(source_words))
 
-    if not snippet:
+
+def highlight_text_with_words(text, words):
+    words = set(words)
+
+    if not text:
         return "<em>No preview text was returned for this source.</em>"
 
     def replace_word(match):
@@ -388,7 +429,7 @@ def highlight_source_snippet(line, snippet):
             return f"<mark>{escape(word)}</mark>"
         return escape(word)
 
-    parts = re.split(r"([A-Za-z0-9']+)", snippet)
+    parts = re.split(r"([A-Za-z0-9']+)", text)
     return "".join(replace_word(re.match(r"[A-Za-z0-9']+", part)) if re.match(r"[A-Za-z0-9']+", part) else escape(part) for part in parts)
 
 
@@ -404,14 +445,22 @@ def search_line(line, max_results):
         href = result.get("href", "")
         body = result.get("body", "")
         score = max(similarity(line, title), similarity(line, body))
+        words_in_title = matched_words(line, title)
+        words_in_snippet = matched_words(line, body)
+        evidence_words = sorted(set(words_in_title + words_in_snippet))
+        exact_phrase_found = line.lower() in body.lower()
 
-        if line.lower() in body.lower() or score >= SIMILARITY_THRESHOLD:
+        if exact_phrase_found or (score >= SIMILARITY_THRESHOLD and len(evidence_words) >= MIN_MATCHED_WORDS):
             matches.append(
                 {
                     "title": title or "Untitled source",
                     "url": href,
                     "snippet": body,
                     "score": round(score, 2),
+                    "matched_words": evidence_words,
+                    "words_in_title": words_in_title,
+                    "words_in_snippet": words_in_snippet,
+                    "exact_phrase_found": exact_phrase_found,
                 }
             )
 
@@ -430,21 +479,17 @@ def check_plagiarism(text, max_results):
 
         try:
             matches = search_line(line, max_results=max_results)
+            search_error = ""
         except Exception as error:
-            matches = [
-                {
-                    "title": "Search failed",
-                    "url": "",
-                    "snippet": str(error),
-                    "score": 0,
-                }
-            ]
+            matches = []
+            search_error = str(error)
 
         report.append(
             {
                 "line_number": line_number,
                 "line": line,
                 "matches": matches,
+                "search_error": search_error,
             }
         )
 
@@ -466,11 +511,25 @@ def report_score(report):
 def build_csv_report(report):
     output = StringIO()
     writer = csv.writer(output)
-    writer.writerow(["line_number", "status", "line", "source_title", "source_url", "similarity_score", "snippet"])
+    writer.writerow(
+        [
+            "line_number",
+            "status",
+            "line",
+            "matched_words",
+            "found_in_title",
+            "found_in_snippet",
+            "source_title",
+            "source_url",
+            "similarity_score",
+            "snippet",
+            "search_note",
+        ]
+    )
 
     for item in report:
         if not item["matches"]:
-            writer.writerow([item["line_number"], "No match found", item["line"], "", "", "", ""])
+            writer.writerow([item["line_number"], "No match found", item["line"], "", "", "", "", "", "", "", item.get("search_error", "")])
             continue
 
         for match in item["matches"]:
@@ -479,10 +538,14 @@ def build_csv_report(report):
                     item["line_number"],
                     "Possible plagiarism",
                     item["line"],
+                    ", ".join(match["matched_words"]),
+                    ", ".join(match["words_in_title"]),
+                    ", ".join(match["words_in_snippet"]),
                     match["title"],
                     match["url"],
                     match["score"],
                     match["snippet"],
+                    item.get("search_error", ""),
                 ]
             )
 
@@ -528,12 +591,15 @@ def render_report(report):
         badge_class = "badge-danger" if found else "badge-clean"
 
         with st.expander(f"Line {item['line_number']}: {label}", expanded=found):
+            words_for_line = sorted({word for match in item["matches"] for word in match.get("matched_words", [])})
+            line_html = highlight_text_with_words(item["line"], words_for_line) if found else escape(item["line"])
+
             st.markdown(
                 f"""
                 <div class="result-card {card_class}">
                     <span class="badge {badge_class}">{escape(label)}</span>
                     <div class="line-text {line_class}">
-                        Line {item['line_number']}: {escape(item['line'])}
+                        Line {item['line_number']}: {line_html}
                     </div>
                 </div>
                 """,
@@ -542,6 +608,15 @@ def render_report(report):
 
             if not found:
                 st.success("This line did not return a likely web source match.")
+                if item.get("search_error"):
+                    st.markdown(
+                        f"""
+                        <div class="search-note">
+                            Search note: {escape(item['search_error'])}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
                 continue
 
             for match in item["matches"]:
@@ -550,14 +625,25 @@ def render_report(report):
                     if match["url"]
                     else '<span class="source-url">No source URL available</span>'
                 )
-                highlighted_snippet = highlight_source_snippet(item["line"], match["snippet"])
+                highlighted_title = highlight_text_with_words(match["title"], match["words_in_title"])
+                highlighted_snippet = highlight_text_with_words(match["snippet"], match["words_in_snippet"])
+                word_chips = "".join(f'<span class="word-chip">{escape(word)}</span>' for word in match["matched_words"])
+                exact_label = "Exact phrase found in snippet" if match["exact_phrase_found"] else "Similar words found in source"
 
                 st.markdown(
                     f"""
                     <div class="source-card">
-                        <div class="source-title">{escape(match['title'])}</div>
+                        <div class="source-title">{highlighted_title}</div>
                         {source_link}
                         <div class="score-pill">Similarity score: {match['score']}</div>
+                        <div class="score-pill">{escape(exact_label)}</div>
+                        <div class="source-location">
+                            Matched words from your sentence:
+                        </div>
+                        <div class="evidence-row">{word_chips}</div>
+                        <div class="source-location">
+                            Found in source preview:
+                        </div>
                         <div class="source-snippet">{highlighted_snippet}</div>
                     </div>
                     """,
@@ -628,7 +714,10 @@ def main():
                 <strong>Green lines</strong> mean no likely web source was found for that line.
                 <br><br>
                 <strong>Highlighted source words</strong> show which words from your line also appeared
-                in the source preview.
+                in the source title or preview.
+                <br><br>
+                <strong>Search notes</strong> are not counted as plagiarism. They only mean the search provider
+                returned no result or had a temporary lookup issue.
                 <br><br>
                 <strong>Similarity score</strong> is a rough match score from <code>0</code> to <code>1</code>.
                 A higher score means the source preview is closer to the checked line.
