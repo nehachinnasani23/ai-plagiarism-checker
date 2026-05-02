@@ -2,6 +2,10 @@
 
 A Python and Streamlit web app that checks pasted text or uploaded files for possible plagiarism. The app scans long lines, searches the web for matching content, and explains which words matched with source links and similarity scores.
 
+## Live Demo
+
+[Open the deployed app](https://ai-plagiarism-checker-rvpxuf4wj8bmy43xqngxuz.streamlit.app/)
+
 ## Project Goal
 
 The goal of this project is to help students, writers, and reviewers quickly identify lines that may need citations or rewriting. It is designed as a practical career portfolio project showing Python, file processing, web search integration, and interactive app development.
@@ -10,7 +14,6 @@ The goal of this project is to help students, writers, and reviewers quickly ide
 
 - Paste text directly into the app
 - Upload `.txt`, `.pdf`, or `.docx` files
-- Dark-mode dashboard UI
 - Animated result cards
 - Polished light research-dashboard theme
 - Check content line by line
@@ -78,4 +81,4 @@ This starter version works best for exact or near-exact copied text from searcha
 - Generate downloadable PDF reports
 - Highlight copied text inside uploaded documents
 - Add citation suggestions
-- Deploy the app online
+- Improve hosted performance for large files

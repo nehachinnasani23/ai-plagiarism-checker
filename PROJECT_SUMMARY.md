@@ -8,6 +8,10 @@ Plagiarism Source Finder
 
 A local Python web app that checks pasted text or uploaded files for possible plagiarism and returns source links.
 
+## Live Demo
+
+https://ai-plagiarism-checker-rvpxuf4wj8bmy43xqngxuz.streamlit.app/
+
 ## Problem
 
 Students and writers often need a quick way to check whether their content may already exist online. Manual searching is slow because each sentence has to be copied into a search engine one by one.
