@@ -1,0 +1,4 @@
+ddgs
+python-docx
+pypdf
+streamlit
