@@ -10,6 +10,8 @@ The goal of this project is to help students, writers, and reviewers quickly ide
 
 - Paste text directly into the app
 - Upload `.txt`, `.pdf`, or `.docx` files
+- Dark-mode dashboard UI
+- Animated result cards
 - Check content line by line
 - Show possible source links
 - Highlight suspicious lines in red
