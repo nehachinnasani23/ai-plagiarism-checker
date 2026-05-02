@@ -16,9 +16,42 @@ HIGHLIGHT_WORD_LENGTH = 5
 MIN_MATCHED_WORDS = 3
 
 
-def apply_styles():
-    st.markdown(
-        """
+THEMES = {
+    "Neon Evidence": {
+        "page": "#070b12",
+        "panel": "rgba(15, 23, 42, 0.86)",
+        "hero_a": "rgba(20, 184, 166, 0.18)",
+        "hero_b": "rgba(220, 38, 38, 0.14)",
+        "accent": "#14b8a6",
+        "accent_dark": "#0f766e",
+        "danger": "#fb7185",
+        "clean": "#2dd4bf",
+    },
+    "Midnight Violet": {
+        "page": "#090816",
+        "panel": "rgba(24, 18, 43, 0.88)",
+        "hero_a": "rgba(168, 85, 247, 0.18)",
+        "hero_b": "rgba(14, 165, 233, 0.14)",
+        "accent": "#a78bfa",
+        "accent_dark": "#7c3aed",
+        "danger": "#f43f5e",
+        "clean": "#38bdf8",
+    },
+    "Emerald Focus": {
+        "page": "#06110d",
+        "panel": "rgba(6, 30, 24, 0.88)",
+        "hero_a": "rgba(16, 185, 129, 0.2)",
+        "hero_b": "rgba(245, 158, 11, 0.13)",
+        "accent": "#10b981",
+        "accent_dark": "#047857",
+        "danger": "#f97316",
+        "clean": "#34d399",
+    },
+}
+
+
+def apply_styles(theme):
+    css = """
         <style>
             @keyframes fadeUp {
                 from {
@@ -49,9 +82,9 @@ def apply_styles():
 
             html, body, [data-testid="stAppViewContainer"] {
                 background:
-                    radial-gradient(circle at 20% 10%, rgba(20, 184, 166, 0.18), transparent 28rem),
-                    radial-gradient(circle at 80% 0%, rgba(220, 38, 38, 0.14), transparent 24rem),
-                    #070b12;
+                    radial-gradient(circle at 20% 10%, __HERO_A__, transparent 28rem),
+                    radial-gradient(circle at 80% 0%, __HERO_B__, transparent 24rem),
+                    __PAGE__;
                 color: #e5e7eb;
             }
 
@@ -80,7 +113,7 @@ def apply_styles():
             }
 
             .hero:before {
-                background: linear-gradient(90deg, #14b8a6, #f97316, #ef4444);
+                background: linear-gradient(90deg, __ACCENT__, #f97316, __DANGER__);
                 content: "";
                 height: 4px;
                 left: 0;
@@ -97,7 +130,7 @@ def apply_styles():
             }
 
             .hero-kicker {
-                color: #5eead4;
+                color: __ACCENT__;
                 font-size: 0.78rem;
                 font-weight: 800;
                 letter-spacing: 0.12em;
@@ -135,12 +168,12 @@ def apply_styles():
             }
 
             [data-testid="stTabs"] button[aria-selected="true"] {
-                color: #5eead4;
+                color: __ACCENT__;
             }
 
             [data-testid="stFileUploader"] {
                 background: rgba(15, 23, 42, 0.72);
-                border: 1px dashed rgba(94, 234, 212, 0.42);
+                border: 1px dashed __ACCENT__;
                 border-radius: 8px;
                 padding: 0.75rem;
             }
@@ -154,7 +187,7 @@ def apply_styles():
 
             .stButton button, .stDownloadButton button {
                 animation: glowPulse 3s ease-in-out infinite;
-                background: linear-gradient(135deg, #14b8a6, #0f766e) !important;
+                background: linear-gradient(135deg, __ACCENT__, __ACCENT_DARK__) !important;
                 border: 0 !important;
                 border-radius: 8px !important;
                 color: #f8fafc !important;
@@ -190,7 +223,7 @@ def apply_styles():
                 border-radius: 8px;
                 margin: 0.7rem 0;
                 padding: 1rem;
-                background: rgba(15, 23, 42, 0.86);
+                background: __PANEL__;
                 transition: border-color 0.18s ease, transform 0.18s ease;
             }
 
@@ -199,12 +232,12 @@ def apply_styles():
             }
 
             .plag-card {
-                border-color: rgba(248, 113, 113, 0.72);
+                border-color: __DANGER__;
                 background: linear-gradient(135deg, rgba(127, 29, 29, 0.42), rgba(15, 23, 42, 0.9));
             }
 
             .clean-card {
-                border-color: rgba(45, 212, 191, 0.62);
+                border-color: __CLEAN__;
                 background: linear-gradient(135deg, rgba(20, 83, 45, 0.36), rgba(15, 23, 42, 0.9));
             }
 
@@ -218,14 +251,14 @@ def apply_styles():
 
             .copied-line {
                 background: rgba(127, 29, 29, 0.78);
-                border-left: 5px solid #fb7185;
+                border-left: 5px solid __DANGER__;
                 color: #fee2e2;
                 font-weight: 600;
             }
 
             .clean-line {
                 background: rgba(20, 83, 45, 0.76);
-                border-left: 5px solid #2dd4bf;
+                border-left: 5px solid __CLEAN__;
                 color: #dcfce7;
             }
 
@@ -259,7 +292,7 @@ def apply_styles():
             }
 
             mark {
-                background: #fb7185;
+                background: __DANGER__;
                 border-radius: 4px;
                 color: #450a0a;
                 font-weight: 700;
@@ -276,12 +309,12 @@ def apply_styles():
             }
 
             .badge-danger {
-                background: #fb7185;
+                background: __DANGER__;
                 color: #450a0a;
             }
 
             .badge-clean {
-                background: #2dd4bf;
+                background: __CLEAN__;
                 color: #042f2e;
             }
 
@@ -305,7 +338,7 @@ def apply_styles():
 
             .word-chip {
                 background: rgba(251, 113, 133, 0.18);
-                border: 1px solid rgba(251, 113, 133, 0.42);
+                border: 1px solid __DANGER__;
                 border-radius: 999px;
                 color: #fecdd3;
                 display: inline-block;
@@ -330,6 +363,29 @@ def apply_styles():
                 padding: 0.75rem;
             }
 
+            .control-help, .source-explanation {
+                animation: fadeUp 0.36s ease-out;
+                background: rgba(15, 23, 42, 0.74);
+                border: 1px solid rgba(148, 163, 184, 0.2);
+                border-radius: 8px;
+                color: #cbd5e1;
+                font-size: 0.92rem;
+                line-height: 1.55;
+                margin-top: 0.65rem;
+                padding: 0.85rem;
+            }
+
+            .source-explanation {
+                border-color: rgba(251, 113, 133, 0.34);
+            }
+
+            .visible-url {
+                color: #93c5fd;
+                font-size: 0.82rem;
+                margin-top: 0.2rem;
+                overflow-wrap: anywhere;
+            }
+
             .guide-panel {
                 animation: fadeUp 0.42s ease-out;
                 background: rgba(15, 23, 42, 0.78);
@@ -346,9 +402,18 @@ def apply_styles():
                 border-radius: 8px;
             }
         </style>
-        """,
-        unsafe_allow_html=True,
+    """
+    css = (
+        css.replace("__PAGE__", theme["page"])
+        .replace("__PANEL__", theme["panel"])
+        .replace("__HERO_A__", theme["hero_a"])
+        .replace("__HERO_B__", theme["hero_b"])
+        .replace("__ACCENT_DARK__", theme["accent_dark"])
+        .replace("__ACCENT__", theme["accent"])
+        .replace("__DANGER__", theme["danger"])
+        .replace("__CLEAN__", theme["clean"])
     )
+    st.markdown(css, unsafe_allow_html=True)
 
 
 def clean_line(line):
@@ -431,6 +496,26 @@ def highlight_text_with_words(text, words):
 
     parts = re.split(r"([A-Za-z0-9']+)", text)
     return "".join(replace_word(re.match(r"[A-Za-z0-9']+", part)) if re.match(r"[A-Za-z0-9']+", part) else escape(part) for part in parts)
+
+
+def explain_match(match):
+    if match["exact_phrase_found"]:
+        return (
+            "This line is flagged because the same phrase appears in the source preview. "
+            "That is strong evidence of copied or uncited text."
+        )
+
+    locations = []
+    if match["words_in_title"]:
+        locations.append("source title")
+    if match["words_in_snippet"]:
+        locations.append("source preview")
+
+    location_text = " and ".join(locations) if locations else "the source result"
+    return (
+        f"This line is flagged because {len(match['matched_words'])} important words from your sentence "
+        f"also appear in the {location_text}, and the similarity score is {match['score']}."
+    )
 
 
 def search_line(line, max_results):
@@ -620,8 +705,9 @@ def render_report(report):
                 continue
 
             for match in item["matches"]:
+                visible_url = escape(match["url"]) if match["url"] else "No source URL available"
                 source_link = (
-                    f'<a class="source-url" href="{escape(match["url"])}" target="_blank">Open source</a>'
+                    f'<a class="source-url" href="{visible_url}" target="_blank">Open source link</a>'
                     if match["url"]
                     else '<span class="source-url">No source URL available</span>'
                 )
@@ -629,14 +715,20 @@ def render_report(report):
                 highlighted_snippet = highlight_text_with_words(match["snippet"], match["words_in_snippet"])
                 word_chips = "".join(f'<span class="word-chip">{escape(word)}</span>' for word in match["matched_words"])
                 exact_label = "Exact phrase found in snippet" if match["exact_phrase_found"] else "Similar words found in source"
+                explanation = explain_match(match)
 
                 st.markdown(
                     f"""
                     <div class="source-card">
                         <div class="source-title">{highlighted_title}</div>
                         {source_link}
+                        <div class="visible-url">{visible_url}</div>
                         <div class="score-pill">Similarity score: {match['score']}</div>
                         <div class="score-pill">{escape(exact_label)}</div>
+                        <div class="source-explanation">
+                            <strong>Why this may be plagiarism:</strong><br>
+                            {escape(explanation)}
+                        </div>
                         <div class="source-location">
                             Matched words from your sentence:
                         </div>
@@ -653,7 +745,17 @@ def render_report(report):
 
 def main():
     st.set_page_config(page_title="AI Plagiarism Checker", page_icon="Search", layout="wide")
-    apply_styles()
+    theme_name = st.sidebar.selectbox("Theme", list(THEMES.keys()))
+    apply_styles(THEMES[theme_name])
+
+    st.sidebar.markdown(
+        """
+        <div class="control-help">
+            Choose a visual theme for screenshots, demos, or LinkedIn project presentation.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown(
         """
@@ -668,6 +770,8 @@ def main():
                 <span class="feature-chip">Line-by-line scan</span>
                 <span class="feature-chip">Source links</span>
                 <span class="feature-chip">Red match highlights</span>
+                <span class="feature-chip">Match explanations</span>
+                <span class="feature-chip">Theme picker</span>
                 <span class="feature-chip">CSV export</span>
             </div>
         </div>
@@ -685,6 +789,19 @@ def main():
 
         with right:
             max_results = st.slider("Search results per line", min_value=1, max_value=5, value=3)
+            st.markdown(
+                """
+                <div class="control-help">
+                    <strong>What does this mean?</strong><br>
+                    For every line in your text, the app checks this many web search results.
+                    <br><br>
+                    <strong>1</strong> = faster but fewer sources checked<br>
+                    <strong>3</strong> = best default for normal checking<br>
+                    <strong>5</strong> = slower but checks more possible sources
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         pasted_text = st.text_area("Or paste text here", height=220)
 
@@ -709,12 +826,22 @@ def main():
         st.markdown(
             """
             <div class="guide-panel">
+                <strong>What is plagiarism?</strong>
+                Plagiarism means using someone else's words, ideas, or structure without giving proper credit.
+                In this app, a red result means the line may need a citation, quotation marks, rewriting, or review.
+                <br><br>
                 <strong>Red lines</strong> mean the checker found a possible source match.
                 <br><br>
                 <strong>Green lines</strong> mean no likely web source was found for that line.
                 <br><br>
+                <strong>Open source link</strong> takes you to the page where matching text or matching words were found.
+                The full URL is also shown below the link.
+                <br><br>
                 <strong>Highlighted source words</strong> show which words from your line also appeared
                 in the source title or preview.
+                <br><br>
+                <strong>Why this may be plagiarism</strong> explains the evidence for each result, including exact phrase
+                matches, matched words, and similarity score.
                 <br><br>
                 <strong>Search notes</strong> are not counted as plagiarism. They only mean the search provider
                 returned no result or had a temporary lookup issue.

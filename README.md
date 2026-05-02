@@ -12,11 +12,15 @@ The goal of this project is to help students, writers, and reviewers quickly ide
 - Upload `.txt`, `.pdf`, or `.docx` files
 - Dark-mode dashboard UI
 - Animated result cards
+- Multiple visual themes
 - Check content line by line
 - Show possible source links
+- Show full source URLs
 - Highlight suspicious lines in red
 - Highlight matching words inside source snippets
 - Show which words matched between your sentence and the source
+- Explain why each line may be plagiarism
+- Explain the search results control inside the app
 - Keep search failures separate from plagiarism matches
 - Display similarity scores
 - Calculate a possible plagiarism percentage
@@ -60,7 +64,7 @@ http://localhost:8501
 4. Short lines are skipped to reduce weak matches.
 5. Each long line is searched as an exact phrase.
 6. Search snippets are compared with the original line.
-7. Possible matches are shown with red line highlights, source links, matched words, highlighted source words, and scores.
+7. Possible matches are shown with red line highlights, source links, full URLs, matched words, highlighted source words, scores, and an explanation of why the line was flagged.
 8. The user can download the results as a CSV report.
 
 ## Limitations
