@@ -28,12 +28,14 @@ The goal of this project is to help students, writers, and reviewers quickly ide
 - Display similarity scores
 - Calculate a possible plagiarism percentage
 - Download a CSV report
+- Download a corrected DOCX with flagged lines rewritten when `OPENAI_API_KEY` is configured
 - Run locally in the browser
 
 ## Tech Stack
 
 - Python
 - Streamlit
+- OpenAI Python SDK
 - DDGS search
 - pypdf
 - python-docx
@@ -68,7 +70,15 @@ http://localhost:8501
 5. Each long line is searched as an exact phrase.
 6. Search snippets are compared with the original line.
 7. Possible matches are shown with red line highlights, source links, full URLs, matched words, highlighted source words, scores, and an explanation of why the line was flagged.
-8. The user can download the results as a CSV report.
+8. The user can download the results as a CSV report or create a corrected DOCX.
+
+## Corrected DOCX Export
+
+The app can generate a new Word document after scanning.
+
+- If `OPENAI_API_KEY` is configured in Streamlit secrets or your local environment, flagged lines are rewritten in original wording.
+- If no API key is configured, the DOCX still marks the flagged lines and includes source links so they can be rewritten manually.
+- The original uploaded file is not changed.
 
 ## Limitations
 
