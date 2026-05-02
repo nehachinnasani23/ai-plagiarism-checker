@@ -1,6 +1,6 @@
 # LinkedIn Post Draft
 
-I built a Python project called AI Plagiarism Checker.
+I built a Python project called Plagiarism Source Finder.
 
 It is a Streamlit web app that allows users to paste text or upload `.txt`, `.pdf`, and `.docx` files. The app checks the content line by line, searches for possible copied text, and returns source links, snippets, similarity scores, and a downloadable CSV report.
 
@@ -19,4 +19,3 @@ This project helped me understand how AI and automation tools can support writin
 Tech stack: Python, Streamlit, DDGS, pypdf, python-docx, difflib
 
 #Python #AI #Streamlit #MachineLearning #DataScience #SoftwareDevelopment #PortfolioProject
-

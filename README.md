@@ -1,6 +1,6 @@
-# AI Plagiarism Checker
+# Plagiarism Source Finder
 
-A Python and Streamlit web app that checks pasted text or uploaded files for possible plagiarism. The app scans long lines, searches the web for matching content, and returns source links with similarity scores.
+A Python and Streamlit web app that checks pasted text or uploaded files for possible plagiarism. The app scans long lines, searches the web for matching content, and explains which words matched with source links and similarity scores.
 
 ## Project Goal
 
@@ -12,7 +12,7 @@ The goal of this project is to help students, writers, and reviewers quickly ide
 - Upload `.txt`, `.pdf`, or `.docx` files
 - Dark-mode dashboard UI
 - Animated result cards
-- Unique graphite-and-teal visual theme
+- Polished light research-dashboard theme
 - Check content line by line
 - Show possible source links
 - Show full source URLs

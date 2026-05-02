@@ -2,7 +2,7 @@
 
 ## Name
 
-AI Plagiarism Checker
+Plagiarism Source Finder
 
 ## One-Line Description
 
@@ -39,4 +39,3 @@ This app automates that workflow. It extracts text, checks each meaningful line,
 ## Suggested Resume Bullet
 
 Built an AI-inspired plagiarism checker using Python and Streamlit that scans pasted text or uploaded TXT, PDF, and DOCX files line by line, identifies possible source matches through web search, calculates similarity scores, and exports CSV reports.
-
