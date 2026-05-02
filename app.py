@@ -16,41 +16,19 @@ HIGHLIGHT_WORD_LENGTH = 5
 MIN_MATCHED_WORDS = 3
 
 
-THEMES = {
-    "Neon Evidence": {
-        "page": "#070b12",
-        "panel": "rgba(15, 23, 42, 0.86)",
-        "hero_a": "rgba(20, 184, 166, 0.18)",
-        "hero_b": "rgba(220, 38, 38, 0.14)",
-        "accent": "#14b8a6",
-        "accent_dark": "#0f766e",
-        "danger": "#fb7185",
-        "clean": "#2dd4bf",
-    },
-    "Midnight Violet": {
-        "page": "#090816",
-        "panel": "rgba(24, 18, 43, 0.88)",
-        "hero_a": "rgba(168, 85, 247, 0.18)",
-        "hero_b": "rgba(14, 165, 233, 0.14)",
-        "accent": "#a78bfa",
-        "accent_dark": "#7c3aed",
-        "danger": "#f43f5e",
-        "clean": "#38bdf8",
-    },
-    "Emerald Focus": {
-        "page": "#06110d",
-        "panel": "rgba(6, 30, 24, 0.88)",
-        "hero_a": "rgba(16, 185, 129, 0.2)",
-        "hero_b": "rgba(245, 158, 11, 0.13)",
-        "accent": "#10b981",
-        "accent_dark": "#047857",
-        "danger": "#f97316",
-        "clean": "#34d399",
-    },
+THEME = {
+    "page": "#090b0f",
+    "panel": "rgba(18, 24, 31, 0.9)",
+    "hero_a": "rgba(24, 154, 144, 0.16)",
+    "hero_b": "rgba(181, 132, 53, 0.12)",
+    "accent": "#2dd4bf",
+    "accent_dark": "#0f766e",
+    "danger": "#e05252",
+    "clean": "#6ee7b7",
 }
 
 
-def apply_styles(theme):
+def apply_styles():
     css = """
         <style>
             @keyframes fadeUp {
@@ -101,8 +79,8 @@ def apply_styles(theme):
             .hero {
                 animation: fadeUp 0.5s ease-out;
                 background:
-                    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.88)),
-                    linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(248, 113, 113, 0.14));
+                    linear-gradient(135deg, rgba(17, 24, 31, 0.98), rgba(31, 37, 45, 0.9)),
+                    linear-gradient(135deg, rgba(45, 212, 191, 0.12), rgba(181, 132, 53, 0.1));
                 border: 1px solid rgba(148, 163, 184, 0.22);
                 border-radius: 8px;
                 box-shadow: 0 28px 80px rgba(0, 0, 0, 0.36);
@@ -113,7 +91,7 @@ def apply_styles(theme):
             }
 
             .hero:before {
-                background: linear-gradient(90deg, __ACCENT__, #f97316, __DANGER__);
+                background: linear-gradient(90deg, __ACCENT__, #b58435, #64748b);
                 content: "";
                 height: 4px;
                 left: 0;
@@ -233,12 +211,12 @@ def apply_styles(theme):
 
             .plag-card {
                 border-color: __DANGER__;
-                background: linear-gradient(135deg, rgba(127, 29, 29, 0.42), rgba(15, 23, 42, 0.9));
+                background: linear-gradient(135deg, rgba(89, 22, 22, 0.48), rgba(18, 24, 31, 0.92));
             }
 
             .clean-card {
                 border-color: __CLEAN__;
-                background: linear-gradient(135deg, rgba(20, 83, 45, 0.36), rgba(15, 23, 42, 0.9));
+                background: linear-gradient(135deg, rgba(13, 76, 67, 0.42), rgba(18, 24, 31, 0.92));
             }
 
             .line-text {
@@ -250,14 +228,14 @@ def apply_styles(theme):
             }
 
             .copied-line {
-                background: rgba(127, 29, 29, 0.78);
+                background: rgba(89, 22, 22, 0.82);
                 border-left: 5px solid __DANGER__;
                 color: #fee2e2;
                 font-weight: 600;
             }
 
             .clean-line {
-                background: rgba(20, 83, 45, 0.76);
+                background: rgba(13, 76, 67, 0.78);
                 border-left: 5px solid __CLEAN__;
                 color: #dcfce7;
             }
@@ -337,7 +315,7 @@ def apply_styles(theme):
             }
 
             .word-chip {
-                background: rgba(251, 113, 133, 0.18);
+                background: rgba(224, 82, 82, 0.16);
                 border: 1px solid __DANGER__;
                 border-radius: 999px;
                 color: #fecdd3;
@@ -404,14 +382,14 @@ def apply_styles(theme):
         </style>
     """
     css = (
-        css.replace("__PAGE__", theme["page"])
-        .replace("__PANEL__", theme["panel"])
-        .replace("__HERO_A__", theme["hero_a"])
-        .replace("__HERO_B__", theme["hero_b"])
-        .replace("__ACCENT_DARK__", theme["accent_dark"])
-        .replace("__ACCENT__", theme["accent"])
-        .replace("__DANGER__", theme["danger"])
-        .replace("__CLEAN__", theme["clean"])
+        css.replace("__PAGE__", THEME["page"])
+        .replace("__PANEL__", THEME["panel"])
+        .replace("__HERO_A__", THEME["hero_a"])
+        .replace("__HERO_B__", THEME["hero_b"])
+        .replace("__ACCENT_DARK__", THEME["accent_dark"])
+        .replace("__ACCENT__", THEME["accent"])
+        .replace("__DANGER__", THEME["danger"])
+        .replace("__CLEAN__", THEME["clean"])
     )
     st.markdown(css, unsafe_allow_html=True)
 
@@ -745,17 +723,7 @@ def render_report(report):
 
 def main():
     st.set_page_config(page_title="AI Plagiarism Checker", page_icon="Search", layout="wide")
-    theme_name = st.sidebar.selectbox("Theme", list(THEMES.keys()))
-    apply_styles(THEMES[theme_name])
-
-    st.sidebar.markdown(
-        """
-        <div class="control-help">
-            Choose a visual theme for screenshots, demos, or LinkedIn project presentation.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    apply_styles()
 
     st.markdown(
         """
@@ -771,7 +739,6 @@ def main():
                 <span class="feature-chip">Source links</span>
                 <span class="feature-chip">Red match highlights</span>
                 <span class="feature-chip">Match explanations</span>
-                <span class="feature-chip">Theme picker</span>
                 <span class="feature-chip">CSV export</span>
             </div>
         </div>

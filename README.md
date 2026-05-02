@@ -12,7 +12,7 @@ The goal of this project is to help students, writers, and reviewers quickly ide
 - Upload `.txt`, `.pdf`, or `.docx` files
 - Dark-mode dashboard UI
 - Animated result cards
-- Multiple visual themes
+- Unique graphite-and-teal visual theme
 - Check content line by line
 - Show possible source links
 - Show full source URLs
