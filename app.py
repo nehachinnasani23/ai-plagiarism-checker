@@ -1,5 +1,6 @@
 import re
 import csv
+from html import escape
 from difflib import SequenceMatcher
 from io import BytesIO, StringIO
 
@@ -11,6 +12,141 @@ from pypdf import PdfReader
 
 MIN_LINE_LENGTH = 35
 SIMILARITY_THRESHOLD = 0.72
+HIGHLIGHT_WORD_LENGTH = 5
+
+
+def apply_styles():
+    st.markdown(
+        """
+        <style>
+            .block-container {
+                padding-top: 2rem;
+                max-width: 1180px;
+            }
+
+            .hero {
+                border-bottom: 1px solid #e5e7eb;
+                margin-bottom: 1.25rem;
+                padding-bottom: 1rem;
+            }
+
+            .hero h1 {
+                margin-bottom: 0.25rem;
+            }
+
+            .help-text {
+                color: #4b5563;
+                font-size: 1rem;
+                margin: 0;
+            }
+
+            .result-card {
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                margin: 0.7rem 0;
+                padding: 1rem;
+                background: #ffffff;
+            }
+
+            .plag-card {
+                border-color: #fecaca;
+                background: #fff7f7;
+            }
+
+            .clean-card {
+                border-color: #bbf7d0;
+                background: #f7fff9;
+            }
+
+            .line-text {
+                border-radius: 6px;
+                font-size: 0.97rem;
+                line-height: 1.6;
+                margin: 0.65rem 0;
+                padding: 0.75rem;
+            }
+
+            .copied-line {
+                background: #fee2e2;
+                border-left: 5px solid #dc2626;
+                color: #7f1d1d;
+                font-weight: 600;
+            }
+
+            .clean-line {
+                background: #dcfce7;
+                border-left: 5px solid #16a34a;
+                color: #14532d;
+            }
+
+            .source-card {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                margin-top: 0.75rem;
+                padding: 0.85rem;
+            }
+
+            .source-title {
+                color: #111827;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+            }
+
+            .source-url {
+                color: #2563eb;
+                font-size: 0.9rem;
+                overflow-wrap: anywhere;
+            }
+
+            .source-snippet {
+                color: #374151;
+                font-size: 0.95rem;
+                line-height: 1.55;
+                margin-top: 0.55rem;
+            }
+
+            mark {
+                background: #fecaca;
+                border-radius: 4px;
+                color: #7f1d1d;
+                font-weight: 700;
+                padding: 0 0.15rem;
+            }
+
+            .badge {
+                border-radius: 999px;
+                display: inline-block;
+                font-size: 0.78rem;
+                font-weight: 700;
+                letter-spacing: 0.01em;
+                padding: 0.25rem 0.6rem;
+            }
+
+            .badge-danger {
+                background: #dc2626;
+                color: #ffffff;
+            }
+
+            .badge-clean {
+                background: #16a34a;
+                color: #ffffff;
+            }
+
+            .score-pill {
+                background: #f3f4f6;
+                border-radius: 999px;
+                color: #374151;
+                display: inline-block;
+                font-size: 0.82rem;
+                font-weight: 600;
+                margin-top: 0.35rem;
+                padding: 0.25rem 0.55rem;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def clean_line(line):
@@ -62,6 +198,31 @@ def read_uploaded_file(file):
 
 def similarity(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
+
+def important_words(text):
+    words = re.findall(r"[A-Za-z0-9']+", text.lower())
+    return {
+        word
+        for word in words
+        if len(word) >= HIGHLIGHT_WORD_LENGTH
+    }
+
+
+def highlight_source_snippet(line, snippet):
+    words = important_words(line)
+
+    if not snippet:
+        return "<em>No preview text was returned for this source.</em>"
+
+    def replace_word(match):
+        word = match.group(0)
+        if word.lower() in words:
+            return f"<mark>{escape(word)}</mark>"
+        return escape(word)
+
+    parts = re.split(r"([A-Za-z0-9']+)", snippet)
+    return "".join(replace_word(re.match(r"[A-Za-z0-9']+", part)) if re.match(r"[A-Za-z0-9']+", part) else escape(part) for part in parts)
 
 
 def search_line(line, max_results):
@@ -165,7 +326,7 @@ def render_report(report):
     plagiarized = [item for item in report if item["matches"]]
     score = report_score(report)
 
-    st.subheader("Summary")
+    st.subheader("Review Summary")
 
     col1, col2, col3 = st.columns(3)
     col1.metric("Lines checked", len(report))
@@ -179,7 +340,14 @@ def render_report(report):
         mime="text/csv",
     )
 
-    st.subheader("Line-by-line results")
+    if score >= 50:
+        st.error("High number of possible matches found. Review the red lines and source links carefully.")
+    elif score > 0:
+        st.warning("Some possible matches were found. Check the highlighted lines before submitting your work.")
+    else:
+        st.success("No possible source matches were found for the checked lines.")
+
+    st.subheader("Line-by-line Review")
 
     if not report:
         st.info("No long enough lines found to check.")
@@ -187,53 +355,110 @@ def render_report(report):
 
     for item in report:
         found = bool(item["matches"])
-        label = "Possible plagiarism" if found else "No match found"
+        label = "Possible plagiarism found" if found else "No match found"
+        card_class = "plag-card" if found else "clean-card"
+        line_class = "copied-line" if found else "clean-line"
+        badge_class = "badge-danger" if found else "badge-clean"
 
         with st.expander(f"Line {item['line_number']}: {label}", expanded=found):
-            st.write(item["line"])
+            st.markdown(
+                f"""
+                <div class="result-card {card_class}">
+                    <span class="badge {badge_class}">{escape(label)}</span>
+                    <div class="line-text {line_class}">
+                        Line {item['line_number']}: {escape(item['line'])}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
             if not found:
-                st.success("No likely source found for this line.")
+                st.success("This line did not return a likely web source match.")
                 continue
 
             for match in item["matches"]:
-                st.markdown(f"**{match['title']}**")
-                if match["url"]:
-                    st.markdown(f"[Open source]({match['url']})")
-                st.caption(f"Similarity score: {match['score']}")
-                st.write(match["snippet"])
-                st.divider()
+                source_link = (
+                    f'<a class="source-url" href="{escape(match["url"])}" target="_blank">Open source</a>'
+                    if match["url"]
+                    else '<span class="source-url">No source URL available</span>'
+                )
+                highlighted_snippet = highlight_source_snippet(item["line"], match["snippet"])
+
+                st.markdown(
+                    f"""
+                    <div class="source-card">
+                        <div class="source-title">{escape(match['title'])}</div>
+                        {source_link}
+                        <div class="score-pill">Similarity score: {match['score']}</div>
+                        <div class="source-snippet">{highlighted_snippet}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
 
 def main():
     st.set_page_config(page_title="AI Plagiarism Checker", page_icon="Search", layout="wide")
-    st.title("AI Plagiarism Checker")
+    apply_styles()
 
-    st.write(
-        "Upload a file or paste text to scan each line for possible copied content and source links."
+    st.markdown(
+        """
+        <div class="hero">
+            <h1>AI Plagiarism Checker</h1>
+            <p class="help-text">
+                Upload a file or paste text. The app highlights suspicious lines in red,
+                shows source links, and marks matching words inside the source preview.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    uploaded_file = st.file_uploader("Upload a file", type=["txt", "pdf", "docx"])
-    pasted_text = st.text_area("Or paste text here", height=220)
+    input_tab, guidance_tab = st.tabs(["Check content", "How to read results"])
 
-    max_results = st.slider("Search results per line", min_value=1, max_value=5, value=3)
+    with input_tab:
+        left, right = st.columns([1, 1])
 
-    if st.button("Check plagiarism", type="primary"):
-        text = pasted_text.strip()
+        with left:
+            uploaded_file = st.file_uploader("Upload a file", type=["txt", "pdf", "docx"])
 
-        if uploaded_file is not None:
-            try:
-                text = read_uploaded_file(uploaded_file)
-            except Exception as error:
-                st.error(error)
+        with right:
+            max_results = st.slider("Search results per line", min_value=1, max_value=5, value=3)
+
+        pasted_text = st.text_area("Or paste text here", height=220)
+
+        if st.button("Check plagiarism", type="primary", use_container_width=True):
+            text = pasted_text.strip()
+
+            if uploaded_file is not None:
+                try:
+                    text = read_uploaded_file(uploaded_file)
+                except Exception as error:
+                    st.error(error)
+                    return
+
+            if not text.strip():
+                st.warning("Please upload a file or paste some text first.")
                 return
 
-        if not text.strip():
-            st.warning("Please upload a file or paste some text first.")
-            return
+            report = check_plagiarism(text, max_results=max_results)
+            render_report(report)
 
-        report = check_plagiarism(text, max_results=max_results)
-        render_report(report)
+    with guidance_tab:
+        st.markdown(
+            """
+            **Red lines** mean the checker found a possible source match.
+
+            **Green lines** mean no likely web source was found for that line.
+
+            **Highlighted source words** show which words from your line also appeared
+            in the source preview.
+
+            **Similarity score** is a rough match score from `0` to `1`. A higher score
+            means the source preview is closer to the checked line.
+            """
+        )
 
 
 if __name__ == "__main__":
