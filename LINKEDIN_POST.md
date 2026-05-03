@@ -1,6 +1,6 @@
 # LinkedIn Post Draft
 
-I built a Python project called Plagiarism Source Finder.
+I built a Python project called Manuscript Originality Studio.
 
 It is a Streamlit pre-publication similarity review app for book chapters and manuscripts. Users can paste text or upload `.txt`, `.pdf`, and `.docx` files. The app screens meaningful manuscript lines, skips references/tables/headings, returns source links, labels editorial risk, and exports CSV plus corrected DOCX review files.
 

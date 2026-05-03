@@ -2,7 +2,7 @@
 
 ## Name
 
-Plagiarism Source Finder
+Manuscript Originality Studio
 
 ## One-Line Description
 

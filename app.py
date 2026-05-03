@@ -31,14 +31,14 @@ SCAN_MODES = {
 
 
 THEME = {
-    "page": "#f5f7fb",
-    "panel": "rgba(255, 255, 255, 0.92)",
-    "hero_a": "rgba(37, 99, 235, 0.16)",
-    "hero_b": "rgba(244, 114, 182, 0.14)",
-    "accent": "#2563eb",
-    "accent_dark": "#1d4ed8",
-    "danger": "#e11d48",
-    "clean": "#059669",
+    "page": "#f7f2ea",
+    "panel": "rgba(255, 252, 246, 0.94)",
+    "hero_a": "rgba(30, 64, 175, 0.18)",
+    "hero_b": "rgba(225, 89, 76, 0.14)",
+    "accent": "#1e40af",
+    "accent_dark": "#172554",
+    "danger": "#d94f45",
+    "clean": "#0f766e",
 }
 
 
@@ -76,12 +76,13 @@ def apply_styles():
                 background:
                     radial-gradient(circle at 20% 10%, __HERO_A__, transparent 28rem),
                     radial-gradient(circle at 80% 0%, __HERO_B__, transparent 24rem),
+                    linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 18rem),
                     __PAGE__;
-                color: #172033;
+                color: #211f2a;
             }
 
             [data-testid="stHeader"] {
-                background: rgba(245, 247, 251, 0.72);
+                background: rgba(247, 242, 234, 0.76);
                 backdrop-filter: blur(16px);
             }
 
@@ -93,11 +94,11 @@ def apply_styles():
             .hero {
                 animation: fadeUp 0.5s ease-out;
                 background:
-                    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(240, 246, 255, 0.92)),
-                    linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(244, 114, 182, 0.1));
-                border: 1px solid rgba(37, 99, 235, 0.14);
+                    linear-gradient(135deg, rgba(255, 252, 246, 0.98), rgba(240, 232, 219, 0.9)),
+                    linear-gradient(135deg, rgba(30, 64, 175, 0.12), rgba(217, 79, 69, 0.11));
+                border: 1px solid rgba(30, 64, 175, 0.18);
                 border-radius: 8px;
-                box-shadow: 0 24px 70px rgba(37, 99, 235, 0.12);
+                box-shadow: 0 28px 80px rgba(38, 31, 22, 0.13);
                 margin-bottom: 1.4rem;
                 overflow: hidden;
                 padding: 1.8rem;
@@ -105,7 +106,7 @@ def apply_styles():
             }
 
             .hero:before {
-                background: linear-gradient(90deg, __ACCENT__, #f472b6, #14b8a6);
+                background: linear-gradient(90deg, #172554, __ACCENT__, __DANGER__, #c89b3c);
                 content: "";
                 height: 4px;
                 left: 0;
@@ -115,8 +116,8 @@ def apply_styles():
             }
 
             .hero h1 {
-                color: #111827;
-                font-size: 2.45rem;
+                color: #171421;
+                font-size: 2.65rem;
                 letter-spacing: 0;
                 margin: 0 0 0.45rem;
             }
@@ -131,7 +132,7 @@ def apply_styles():
             }
 
             .help-text {
-                color: #445069;
+                color: #4b4658;
                 font-size: 1rem;
                 margin: 0;
                 max-width: 760px;
@@ -145,17 +146,17 @@ def apply_styles():
             }
 
             .feature-chip {
-                background: rgba(255, 255, 255, 0.8);
-                border: 1px solid rgba(37, 99, 235, 0.15);
+                background: rgba(255, 252, 246, 0.86);
+                border: 1px solid rgba(30, 64, 175, 0.16);
                 border-radius: 999px;
-                color: #1f2a44;
+                color: #252136;
                 font-size: 0.86rem;
                 font-weight: 700;
                 padding: 0.45rem 0.7rem;
             }
 
             [data-testid="stTabs"] button {
-                color: #475569;
+                color: #5b5568;
                 font-weight: 700;
             }
 
@@ -164,15 +165,15 @@ def apply_styles():
             }
 
             [data-testid="stFileUploader"] {
-                background: rgba(255, 255, 255, 0.82);
+                background: rgba(255, 252, 246, 0.86);
                 border: 1px dashed __ACCENT__;
                 border-radius: 8px;
                 padding: 0.75rem;
             }
 
             [data-testid="stTextArea"] textarea {
-                background: rgba(255, 255, 255, 0.92);
-                border: 1px solid rgba(37, 99, 235, 0.18);
+                background: rgba(255, 252, 246, 0.96);
+                border: 1px solid rgba(30, 64, 175, 0.18);
                 border-radius: 8px;
                 color: #111827;
             }
@@ -195,8 +196,8 @@ def apply_styles():
 
             [data-testid="stMetric"] {
                 animation: fadeUp 0.42s ease-out;
-                background: rgba(255, 255, 255, 0.92);
-                border: 1px solid rgba(37, 99, 235, 0.12);
+                background: rgba(255, 252, 246, 0.96);
+                border: 1px solid rgba(30, 64, 175, 0.13);
                 border-radius: 8px;
                 padding: 1rem;
             }
@@ -225,12 +226,12 @@ def apply_styles():
 
             .plag-card {
                 border-color: __DANGER__;
-                background: linear-gradient(135deg, rgba(255, 241, 242, 0.98), rgba(255, 255, 255, 0.94));
+                background: linear-gradient(135deg, rgba(255, 237, 233, 0.98), rgba(255, 252, 246, 0.94));
             }
 
             .clean-card {
                 border-color: __CLEAN__;
-                background: linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(255, 255, 255, 0.94));
+                background: linear-gradient(135deg, rgba(230, 247, 242, 0.98), rgba(255, 252, 246, 0.94));
             }
 
             .line-text {
@@ -242,21 +243,21 @@ def apply_styles():
             }
 
             .copied-line {
-                background: #fff1f2;
+                background: #fff0ec;
                 border-left: 5px solid __DANGER__;
                 color: #881337;
                 font-weight: 600;
             }
 
             .clean-line {
-                background: #ecfdf5;
+                background: #e8f7f3;
                 border-left: 5px solid __CLEAN__;
                 color: #064e3b;
             }
 
             .source-card {
                 animation: fadeUp 0.34s ease-out;
-                background: rgba(255, 255, 255, 0.88);
+                background: rgba(255, 252, 246, 0.92);
                 border: 1px solid rgba(148, 163, 184, 0.22);
                 border-radius: 8px;
                 margin-top: 0.75rem;
@@ -311,9 +312,9 @@ def apply_styles():
             }
 
             .score-pill {
-                background: #eef2ff;
+                background: #eaf0ff;
                 border-radius: 999px;
-                color: #1e3a8a;
+                color: #172554;
                 display: inline-block;
                 font-size: 0.82rem;
                 font-weight: 600;
@@ -329,7 +330,7 @@ def apply_styles():
             }
 
             .word-chip {
-                background: #fff1f2;
+                background: #fff0ec;
                 border: 1px solid __DANGER__;
                 border-radius: 999px;
                 color: #9f1239;
@@ -357,8 +358,8 @@ def apply_styles():
 
             .control-help, .source-explanation {
                 animation: fadeUp 0.36s ease-out;
-                background: rgba(255, 255, 255, 0.88);
-                border: 1px solid rgba(37, 99, 235, 0.14);
+                background: rgba(255, 252, 246, 0.9);
+                border: 1px solid rgba(30, 64, 175, 0.14);
                 border-radius: 8px;
                 color: #475569;
                 font-size: 0.92rem;
@@ -389,8 +390,8 @@ def apply_styles():
 
             .guide-panel {
                 animation: fadeUp 0.42s ease-out;
-                background: rgba(255, 255, 255, 0.9);
-                border: 1px solid rgba(37, 99, 235, 0.14);
+                background: rgba(255, 252, 246, 0.92);
+                border: 1px solid rgba(30, 64, 175, 0.14);
                 border-radius: 8px;
                 color: #475569;
                 line-height: 1.65;
@@ -398,7 +399,7 @@ def apply_styles():
             }
 
             section[data-testid="stExpander"] {
-                background: rgba(255, 255, 255, 0.76);
+                background: rgba(255, 252, 246, 0.78);
                 border: 1px solid rgba(148, 163, 184, 0.2);
                 border-radius: 8px;
             }
@@ -951,25 +952,25 @@ def render_report(report, original_text):
 
 
 def main():
-    st.set_page_config(page_title="Plagiarism Source Finder", page_icon="Search", layout="wide")
+    st.set_page_config(page_title="Manuscript Originality Studio", page_icon="Search", layout="wide")
     apply_styles()
 
     st.markdown(
         """
         <div class="hero">
-            <div class="hero-kicker">Source Evidence Review</div>
-            <h1>Plagiarism Source Finder</h1>
+            <div class="hero-kicker">Publication Review Desk</div>
+            <h1>Manuscript Originality Studio</h1>
             <p class="help-text">
-                Pre-publication similarity screening for book chapters and manuscripts. Find source overlap,
-                review citation risks, and export an editor-ready DOCX before submission.
+                A polished pre-publication workspace for checking book chapters, tracing source overlap,
+                resolving citation risks, and exporting editor-ready revision documents.
             </p>
             <div class="feature-strip">
-                <span class="feature-chip">Publisher-style similarity review</span>
-                <span class="feature-chip">Shows source URLs</span>
-                <span class="feature-chip">Skips references and tables</span>
-                <span class="feature-chip">Labels citation risks</span>
-                <span class="feature-chip">Exports corrected DOCX</span>
-                <span class="feature-chip">Exports CSV report</span>
+                <span class="feature-chip">Editorial similarity review</span>
+                <span class="feature-chip">Source evidence links</span>
+                <span class="feature-chip">Reference-aware scanning</span>
+                <span class="feature-chip">Citation risk labels</span>
+                <span class="feature-chip">Corrected DOCX export</span>
+                <span class="feature-chip">Publication readiness score</span>
             </div>
         </div>
         """,
