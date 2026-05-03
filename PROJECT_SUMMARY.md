@@ -33,7 +33,7 @@ This app automates a pre-publication review workflow. It extracts text, skips st
 - Rewrite required / citation needed / editor review labels
 - Source URL reporting
 - CSV report download
-- Corrected DOCX export
+- CSV evidence report export
 
 ## Career Skills Demonstrated
 
@@ -47,4 +47,4 @@ This app automates a pre-publication review workflow. It extracts text, skips st
 
 ## Suggested Resume Bullet
 
-Built a Python and Streamlit pre-publication similarity review tool that scans uploaded TXT, PDF, and DOCX manuscripts, skips references and structural content, identifies source overlap through web search, labels rewrite/citation risks, calculates publication readiness, and exports CSV plus corrected DOCX review files.
+Built a Python and Streamlit pre-publication similarity review tool that scans uploaded TXT, PDF, and DOCX manuscripts, skips references and structural content, identifies source overlap through web search, labels rewrite/citation risks, calculates publication readiness, and exports CSV evidence reports.

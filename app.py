@@ -1,6 +1,5 @@
 import re
 import csv
-import os
 from html import escape
 from difflib import SequenceMatcher
 from io import BytesIO, StringIO
@@ -10,17 +9,11 @@ from ddgs import DDGS
 from docx import Document
 from pypdf import PdfReader
 
-try:
-    from openai import OpenAI
-except ImportError:
-    OpenAI = None
-
 
 MIN_LINE_LENGTH = 35
 SIMILARITY_THRESHOLD = 0.72
 HIGHLIGHT_WORD_LENGTH = 5
 MIN_MATCHED_WORDS = 3
-REWRITE_MODEL = "gpt-4.1-mini"
 
 
 SCAN_MODES = {
@@ -379,15 +372,6 @@ def apply_styles():
                 overflow-wrap: anywhere;
             }
 
-            .rewrite-note {
-                background: #fff7ed;
-                border: 1px solid #fdba74;
-                border-radius: 8px;
-                color: #9a3412;
-                margin: 0.8rem 0;
-                padding: 0.85rem;
-            }
-
             .guide-panel {
                 animation: fadeUp 0.42s ease-out;
                 background: rgba(255, 252, 246, 0.92);
@@ -695,117 +679,6 @@ def build_csv_report(report):
     return output.getvalue()
 
 
-def get_openai_api_key():
-    try:
-        secret_key = st.secrets.get("OPENAI_API_KEY", "")
-    except Exception:
-        secret_key = ""
-
-    return secret_key or os.environ.get("OPENAI_API_KEY", "")
-
-
-def rewrite_line_with_ai(line, matches):
-    api_key = get_openai_api_key()
-    if not api_key or OpenAI is None:
-        return ""
-
-    source_context = "\n".join(
-        f"- {match['title']}: {match['url']}\n  Snippet: {match['snippet']}"
-        for match in matches[:2]
-    )
-    prompt = f"""
-Rewrite the student's sentence in original wording while preserving the meaning.
-Do not copy the source wording. Keep it clear, academic, and concise.
-Do not add quotation marks. Return only the rewritten sentence.
-
-Student sentence:
-{line}
-
-Possible source evidence:
-{source_context}
-"""
-
-    try:
-        client = OpenAI(api_key=api_key)
-        response = client.responses.create(
-            model=REWRITE_MODEL,
-            input=prompt,
-        )
-        return response.output_text.strip()
-    except Exception:
-        return ""
-
-
-def build_corrected_docx(original_text, report):
-    doc = Document()
-    doc.add_heading("Corrected Plagiarism Review Document", level=1)
-
-    matched_items = [item for item in report if item["matches"]]
-    api_enabled = bool(get_openai_api_key() and OpenAI is not None)
-    readiness_score, readiness_label = publication_readiness(report)
-
-    doc.add_paragraph(f"Lines checked: {len(report)}")
-    doc.add_paragraph(f"Lines with similarity matches: {len(matched_items)}")
-    doc.add_paragraph(f"Similarity score: {report_score(report)}%")
-    doc.add_paragraph(f"Publication readiness: {readiness_score}% - {readiness_label}")
-
-    if api_enabled:
-        doc.add_paragraph(
-            "Flagged lines were rewritten with AI assistance where possible. Review the changes before final submission."
-        )
-    else:
-        doc.add_paragraph(
-            "AI rewriting is not enabled because OPENAI_API_KEY is not configured. Flagged lines are marked for rewriting and include source links."
-        )
-
-    doc.add_heading("Corrected / Reviewed Text", level=2)
-
-    report_by_line = {item["line_number"]: item for item in report}
-
-    for line_number, raw_line in enumerate(original_text.splitlines(), start=1):
-        item = report_by_line.get(line_number)
-        if not raw_line.strip():
-            doc.add_paragraph("")
-            continue
-
-        if item and item["matches"]:
-            rewritten = rewrite_line_with_ai(item["line"], item["matches"])
-            paragraph = doc.add_paragraph()
-            paragraph.add_run("Revised line: ").bold = True
-            paragraph.add_run(rewritten or item["line"])
-
-            if not rewritten:
-                note = doc.add_paragraph()
-                note.add_run("Action needed: ").bold = True
-                note.add_run("Rewrite this line in your own words or add a citation before final use.")
-
-            source_note = doc.add_paragraph()
-            source_note.add_run("Possible source(s): ").bold = True
-            source_note.add_run(", ".join(match["url"] for match in item["matches"][:3] if match["url"]))
-        else:
-            doc.add_paragraph(raw_line)
-
-    doc.add_page_break()
-    doc.add_heading("Publication Similarity Review Notes", level=2)
-
-    if not matched_items:
-        doc.add_paragraph("No source similarity matches were found for the checked lines.")
-    else:
-        for item in matched_items:
-            doc.add_heading(f"Line {item['line_number']}", level=3)
-            doc.add_paragraph(item["line"])
-            for match in item["matches"][:3]:
-                doc.add_paragraph(f"Source: {match['title']}")
-                doc.add_paragraph(f"URL: {match['url']}")
-                doc.add_paragraph(f"Editorial label: {match.get('review_label', 'Editor review')}")
-                doc.add_paragraph(f"Matched words: {', '.join(match['matched_words'])}")
-                doc.add_paragraph(f"Similarity score: {match['score']}")
-
-    output = BytesIO()
-    doc.save(output)
-    return output.getvalue()
-
-
 def render_report(report, original_text):
     plagiarized = [item for item in report if item["matches"]]
     score = report_score(report)
@@ -826,42 +699,8 @@ def render_report(report, original_text):
         mime="text/csv",
     )
 
-    api_enabled = bool(get_openai_api_key() and OpenAI is not None)
-    if api_enabled:
-        st.markdown(
-            """
-            <div class="rewrite-note">
-                AI rewrite export is enabled. The corrected DOCX will rewrite flagged lines and include source notes.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            """
-            <div class="rewrite-note">
-                AI rewrite export is not enabled on this deployment. The DOCX will still mark flagged lines,
-                include source links, and show what needs rewriting. Add <strong>OPENAI_API_KEY</strong> in
-                Streamlit secrets to enable automatic rewriting.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    if st.button("Prepare corrected DOCX", use_container_width=True):
-        with st.spinner("Building corrected document..."):
-            st.session_state["corrected_docx"] = build_corrected_docx(original_text, report)
-
-    if "corrected_docx" in st.session_state:
-        st.download_button(
-            "Download corrected DOCX",
-            data=st.session_state["corrected_docx"],
-            file_name="corrected_plagiarism_review.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        )
-
     if score >= 50:
-        st.error(f"{readiness_label}. Review the red lines, source links, citations, and rewriting notes.")
+        st.error(f"{readiness_label}. Review the red lines, source links, and citation labels.")
     elif score > 0:
         st.warning(f"{readiness_label}. Some source similarity was found; review before submission.")
     else:
@@ -962,14 +801,14 @@ def main():
             <h1>Manuscript Originality Studio</h1>
             <p class="help-text">
                 A polished pre-publication workspace for checking book chapters, tracing source overlap,
-                resolving citation risks, and exporting editor-ready revision documents.
+                and reviewing citation risks before submission.
             </p>
             <div class="feature-strip">
                 <span class="feature-chip">Editorial similarity review</span>
                 <span class="feature-chip">Source evidence links</span>
                 <span class="feature-chip">Reference-aware scanning</span>
                 <span class="feature-chip">Citation risk labels</span>
-                <span class="feature-chip">Corrected DOCX export</span>
+                <span class="feature-chip">CSV evidence report</span>
                 <span class="feature-chip">Publication readiness score</span>
             </div>
         </div>
@@ -1049,9 +888,6 @@ def main():
                 <strong>Publication readiness</strong> is a practical risk score for revision planning. It is not a
                 publisher certificate or an iThenticate replacement.
                 <br><br>
-                <strong>Corrected DOCX</strong> creates a new Word document. If an OpenAI API key is configured
-                in Streamlit secrets, flagged lines are rewritten. If not, the document marks each flagged line
-                and includes source links so you can rewrite it manually.
             </div>
             """,
             unsafe_allow_html=True,

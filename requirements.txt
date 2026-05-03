@@ -1,5 +1,4 @@
 ddgs
-openai
 python-docx
 pypdf
 streamlit

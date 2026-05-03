@@ -1,6 +1,6 @@
 # Manuscript Originality Studio
 
-A Python and Streamlit pre-publication originality review app for book chapters and manuscripts. The app scans uploaded text, finds possible source overlap, labels editorial risk, and exports a corrected DOCX review file.
+A Python and Streamlit pre-publication originality review app for book chapters and manuscripts. The app scans uploaded text, finds possible source overlap, labels editorial risk, and exports a CSV evidence report.
 
 ## Live Demo
 
@@ -28,14 +28,12 @@ The goal of this project is to help authors, students, editors, and reviewers id
 - Display similarity scores
 - Calculate a similarity percentage and publication readiness score
 - Download a CSV report
-- Download a corrected DOCX with flagged lines rewritten when `OPENAI_API_KEY` is configured
 - Run locally in the browser
 
 ## Tech Stack
 
 - Python
 - Streamlit
-- OpenAI Python SDK
 - DDGS search
 - pypdf
 - python-docx
@@ -70,7 +68,7 @@ http://localhost:8501
 5. Search snippets are compared with the original line.
 6. Matches are labeled as Rewrite required, Citation needed, or Editor review.
 7. Results show source links, full URLs, matched words, highlighted source words, scores, and an explanation of why the line was flagged.
-8. The user can download the results as a CSV report or create a corrected DOCX.
+8. The user can download the results as a CSV evidence report.
 
 ## Publication Workflow Basis
 
@@ -81,14 +79,6 @@ Publication workflows typically use similarity screening as editorial evidence r
 - Springer Nature says copied sentences without proper citation can be considered plagiarism.
 - Elsevier describes plagiarism as copying or paraphrasing substantial parts of another work without attribution.
 - COPE guidance treats suspected plagiarism and text recycling as editorial review matters.
-
-## Corrected DOCX Export
-
-The app can generate a new Word document after scanning.
-
-- If `OPENAI_API_KEY` is configured in Streamlit secrets or your local environment, flagged lines are rewritten in original wording.
-- If no API key is configured, the DOCX still marks the flagged lines and includes source links so they can be rewritten manually.
-- The original uploaded file is not changed.
 
 ## Limitations
 
