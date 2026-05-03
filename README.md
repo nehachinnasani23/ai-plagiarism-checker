@@ -15,7 +15,7 @@ The goal of this project is to help authors, students, editors, and reviewers id
 - Paste text directly into the app
 - Upload `.txt`, `.pdf`, or `.docx` files
 - Animated result cards
-- Stylish editorial desk theme
+- Stylish dark editorial desk theme
 - Publication scan modes: Fast precheck, Publication review, and Deep editorial scan
 - Skip headings, tables, figures, image artifacts, and references
 - Show possible source links

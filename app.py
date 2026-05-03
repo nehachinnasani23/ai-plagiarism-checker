@@ -24,14 +24,14 @@ SCAN_MODES = {
 
 
 THEME = {
-    "page": "#f7f2ea",
-    "panel": "rgba(255, 252, 246, 0.94)",
-    "hero_a": "rgba(30, 64, 175, 0.18)",
-    "hero_b": "rgba(225, 89, 76, 0.14)",
-    "accent": "#1e40af",
-    "accent_dark": "#172554",
-    "danger": "#d94f45",
-    "clean": "#0f766e",
+    "page": "#080b13",
+    "panel": "rgba(17, 24, 39, 0.92)",
+    "hero_a": "rgba(196, 164, 94, 0.18)",
+    "hero_b": "rgba(217, 79, 69, 0.16)",
+    "accent": "#d6b76a",
+    "accent_dark": "#8f6f2a",
+    "danger": "#ff6b5f",
+    "clean": "#2dd4bf",
 }
 
 
@@ -62,20 +62,20 @@ def apply_styles():
             }
 
             :root {
-                color-scheme: light;
+                color-scheme: dark;
             }
 
             html, body, [data-testid="stAppViewContainer"] {
                 background:
                     radial-gradient(circle at 20% 10%, __HERO_A__, transparent 28rem),
                     radial-gradient(circle at 80% 0%, __HERO_B__, transparent 24rem),
-                    linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 18rem),
+                    linear-gradient(180deg, rgba(16, 24, 39, 0.7), transparent 18rem),
                     __PAGE__;
-                color: #211f2a;
+                color: #f5efe5;
             }
 
             [data-testid="stHeader"] {
-                background: rgba(247, 242, 234, 0.76);
+                background: rgba(8, 11, 19, 0.78);
                 backdrop-filter: blur(16px);
             }
 
@@ -87,11 +87,11 @@ def apply_styles():
             .hero {
                 animation: fadeUp 0.5s ease-out;
                 background:
-                    linear-gradient(135deg, rgba(255, 252, 246, 0.98), rgba(240, 232, 219, 0.9)),
-                    linear-gradient(135deg, rgba(30, 64, 175, 0.12), rgba(217, 79, 69, 0.11));
-                border: 1px solid rgba(30, 64, 175, 0.18);
+                    linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(31, 41, 55, 0.9)),
+                    linear-gradient(135deg, rgba(214, 183, 106, 0.13), rgba(255, 107, 95, 0.1));
+                border: 1px solid rgba(214, 183, 106, 0.2);
                 border-radius: 8px;
-                box-shadow: 0 28px 80px rgba(38, 31, 22, 0.13);
+                box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
                 margin-bottom: 1.4rem;
                 overflow: hidden;
                 padding: 1.8rem;
@@ -99,7 +99,7 @@ def apply_styles():
             }
 
             .hero:before {
-                background: linear-gradient(90deg, #172554, __ACCENT__, __DANGER__, #c89b3c);
+                background: linear-gradient(90deg, #f5efe5, __ACCENT__, __DANGER__, #2dd4bf);
                 content: "";
                 height: 4px;
                 left: 0;
@@ -109,7 +109,7 @@ def apply_styles():
             }
 
             .hero h1 {
-                color: #171421;
+                color: #fff7ed;
                 font-size: 2.65rem;
                 letter-spacing: 0;
                 margin: 0 0 0.45rem;
@@ -125,7 +125,7 @@ def apply_styles():
             }
 
             .help-text {
-                color: #4b4658;
+                color: #cbd5e1;
                 font-size: 1rem;
                 margin: 0;
                 max-width: 760px;
@@ -139,17 +139,17 @@ def apply_styles():
             }
 
             .feature-chip {
-                background: rgba(255, 252, 246, 0.86);
-                border: 1px solid rgba(30, 64, 175, 0.16);
+                background: rgba(15, 23, 42, 0.72);
+                border: 1px solid rgba(214, 183, 106, 0.25);
                 border-radius: 999px;
-                color: #252136;
+                color: #f8fafc;
                 font-size: 0.86rem;
                 font-weight: 700;
                 padding: 0.45rem 0.7rem;
             }
 
             [data-testid="stTabs"] button {
-                color: #5b5568;
+                color: #cbd5e1;
                 font-weight: 700;
             }
 
@@ -158,17 +158,17 @@ def apply_styles():
             }
 
             [data-testid="stFileUploader"] {
-                background: rgba(255, 252, 246, 0.86);
+                background: rgba(15, 23, 42, 0.78);
                 border: 1px dashed __ACCENT__;
                 border-radius: 8px;
                 padding: 0.75rem;
             }
 
             [data-testid="stTextArea"] textarea {
-                background: rgba(255, 252, 246, 0.96);
-                border: 1px solid rgba(30, 64, 175, 0.18);
+                background: rgba(15, 23, 42, 0.84);
+                border: 1px solid rgba(214, 183, 106, 0.2);
                 border-radius: 8px;
-                color: #111827;
+                color: #f8fafc;
             }
 
             .stButton button, .stDownloadButton button {
@@ -189,18 +189,18 @@ def apply_styles():
 
             [data-testid="stMetric"] {
                 animation: fadeUp 0.42s ease-out;
-                background: rgba(255, 252, 246, 0.96);
-                border: 1px solid rgba(30, 64, 175, 0.13);
+                background: rgba(17, 24, 39, 0.92);
+                border: 1px solid rgba(214, 183, 106, 0.16);
                 border-radius: 8px;
                 padding: 1rem;
             }
 
             [data-testid="stMetricLabel"] {
-                color: #64748b;
+                color: #94a3b8;
             }
 
             [data-testid="stMetricValue"] {
-                color: #111827;
+                color: #fff7ed;
             }
 
             .result-card {
@@ -219,12 +219,12 @@ def apply_styles():
 
             .plag-card {
                 border-color: __DANGER__;
-                background: linear-gradient(135deg, rgba(255, 237, 233, 0.98), rgba(255, 252, 246, 0.94));
+                background: linear-gradient(135deg, rgba(91, 28, 28, 0.62), rgba(17, 24, 39, 0.94));
             }
 
             .clean-card {
                 border-color: __CLEAN__;
-                background: linear-gradient(135deg, rgba(230, 247, 242, 0.98), rgba(255, 252, 246, 0.94));
+                background: linear-gradient(135deg, rgba(13, 76, 67, 0.52), rgba(17, 24, 39, 0.94));
             }
 
             .line-text {
@@ -236,22 +236,22 @@ def apply_styles():
             }
 
             .copied-line {
-                background: #fff0ec;
+                background: rgba(91, 28, 28, 0.78);
                 border-left: 5px solid __DANGER__;
-                color: #881337;
+                color: #ffe4e0;
                 font-weight: 600;
             }
 
             .clean-line {
-                background: #e8f7f3;
+                background: rgba(13, 76, 67, 0.7);
                 border-left: 5px solid __CLEAN__;
-                color: #064e3b;
+                color: #ccfbf1;
             }
 
             .source-card {
                 animation: fadeUp 0.34s ease-out;
-                background: rgba(255, 252, 246, 0.92);
-                border: 1px solid rgba(148, 163, 184, 0.22);
+                background: rgba(15, 23, 42, 0.76);
+                border: 1px solid rgba(148, 163, 184, 0.18);
                 border-radius: 8px;
                 margin-top: 0.75rem;
                 padding: 0.85rem;
@@ -259,19 +259,19 @@ def apply_styles():
             }
 
             .source-title {
-                color: #111827;
+                color: #fff7ed;
                 font-weight: 700;
                 margin-bottom: 0.25rem;
             }
 
             .source-url {
-                color: #1d4ed8;
+                color: #93c5fd;
                 font-size: 0.9rem;
                 overflow-wrap: anywhere;
             }
 
             .source-snippet {
-                color: #334155;
+                color: #cbd5e1;
                 font-size: 0.95rem;
                 line-height: 1.55;
                 margin-top: 0.55rem;
@@ -305,9 +305,9 @@ def apply_styles():
             }
 
             .score-pill {
-                background: #eaf0ff;
+                background: rgba(214, 183, 106, 0.16);
                 border-radius: 999px;
-                color: #172554;
+                color: #fde68a;
                 display: inline-block;
                 font-size: 0.82rem;
                 font-weight: 600;
@@ -323,10 +323,10 @@ def apply_styles():
             }
 
             .word-chip {
-                background: #fff0ec;
+                background: rgba(255, 107, 95, 0.14);
                 border: 1px solid __DANGER__;
                 border-radius: 999px;
-                color: #9f1239;
+                color: #fecaca;
                 display: inline-block;
                 font-size: 0.78rem;
                 font-weight: 700;
@@ -334,7 +334,7 @@ def apply_styles():
             }
 
             .source-location {
-                color: #64748b;
+                color: #94a3b8;
                 font-size: 0.86rem;
                 font-weight: 700;
                 margin-top: 0.5rem;
@@ -344,17 +344,17 @@ def apply_styles():
                 background: rgba(234, 179, 8, 0.12);
                 border: 1px solid rgba(234, 179, 8, 0.3);
                 border-radius: 8px;
-                color: #92400e;
+                color: #fde68a;
                 margin-top: 0.7rem;
                 padding: 0.75rem;
             }
 
             .control-help, .source-explanation {
                 animation: fadeUp 0.36s ease-out;
-                background: rgba(255, 252, 246, 0.9);
-                border: 1px solid rgba(30, 64, 175, 0.14);
+                background: rgba(15, 23, 42, 0.78);
+                border: 1px solid rgba(214, 183, 106, 0.18);
                 border-radius: 8px;
-                color: #475569;
+                color: #cbd5e1;
                 font-size: 0.92rem;
                 line-height: 1.55;
                 margin-top: 0.65rem;
@@ -366,7 +366,7 @@ def apply_styles():
             }
 
             .visible-url {
-                color: #1d4ed8;
+                color: #93c5fd;
                 font-size: 0.82rem;
                 margin-top: 0.2rem;
                 overflow-wrap: anywhere;
@@ -374,17 +374,17 @@ def apply_styles():
 
             .guide-panel {
                 animation: fadeUp 0.42s ease-out;
-                background: rgba(255, 252, 246, 0.92);
-                border: 1px solid rgba(30, 64, 175, 0.14);
+                background: rgba(15, 23, 42, 0.82);
+                border: 1px solid rgba(214, 183, 106, 0.18);
                 border-radius: 8px;
-                color: #475569;
+                color: #cbd5e1;
                 line-height: 1.65;
                 padding: 1.2rem;
             }
 
             section[data-testid="stExpander"] {
-                background: rgba(255, 252, 246, 0.78);
-                border: 1px solid rgba(148, 163, 184, 0.2);
+                background: rgba(15, 23, 42, 0.62);
+                border: 1px solid rgba(148, 163, 184, 0.16);
                 border-radius: 8px;
             }
         </style>
