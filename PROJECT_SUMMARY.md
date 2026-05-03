@@ -6,7 +6,7 @@ Plagiarism Source Finder
 
 ## One-Line Description
 
-A local Python web app that checks pasted text or uploaded files for possible plagiarism and returns source links.
+A Streamlit pre-publication similarity review app that checks book chapters and manuscripts for source overlap, citation risk, and rewrite needs.
 
 ## Live Demo
 
@@ -14,11 +14,11 @@ https://ai-plagiarism-checker-rvpxuf4wj8bmy43xqngxuz.streamlit.app/
 
 ## Problem
 
-Students and writers often need a quick way to check whether their content may already exist online. Manual searching is slow because each sentence has to be copied into a search engine one by one.
+Authors, students, and editors often need to check whether manuscript text overlaps with online or published source material before submission. Manual searching is slow, and raw similarity scores still require editorial interpretation.
 
 ## Solution
 
-This app automates that workflow. It extracts text, checks each meaningful line, searches the web, compares snippets, and returns a line-by-line report with source links.
+This app automates a pre-publication review workflow. It extracts text, skips structural content such as references and tables, checks meaningful manuscript lines, compares source snippets, labels editorial risk, and exports review files for revision.
 
 ## Core Features
 
@@ -26,9 +26,14 @@ This app automates that workflow. It extracts text, checks each meaningful line,
 - File upload input
 - TXT, PDF, and DOCX support
 - Line-by-line checking
+- Publication scan modes
+- Reference/table/heading skipping
 - Similarity scoring
+- Publication readiness scoring
+- Rewrite required / citation needed / editor review labels
 - Source URL reporting
 - CSV report download
+- Corrected DOCX export
 
 ## Career Skills Demonstrated
 
@@ -42,4 +47,4 @@ This app automates that workflow. It extracts text, checks each meaningful line,
 
 ## Suggested Resume Bullet
 
-Built an AI-inspired plagiarism checker using Python and Streamlit that scans pasted text or uploaded TXT, PDF, and DOCX files line by line, identifies possible source matches through web search, calculates similarity scores, and exports CSV reports.
+Built a Python and Streamlit pre-publication similarity review tool that scans uploaded TXT, PDF, and DOCX manuscripts, skips references and structural content, identifies source overlap through web search, labels rewrite/citation risks, calculates publication readiness, and exports CSV plus corrected DOCX review files.

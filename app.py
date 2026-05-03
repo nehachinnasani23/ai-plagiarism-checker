@@ -23,6 +23,13 @@ MIN_MATCHED_WORDS = 3
 REWRITE_MODEL = "gpt-4.1-mini"
 
 
+SCAN_MODES = {
+    "Fast precheck": {"max_results": 1, "min_length": 55, "max_lines": 35},
+    "Publication review": {"max_results": 3, "min_length": 40, "max_lines": 90},
+    "Deep editorial scan": {"max_results": 5, "min_length": 35, "max_lines": 160},
+}
+
+
 THEME = {
     "page": "#f5f7fb",
     "panel": "rgba(255, 255, 255, 0.92)",
@@ -414,13 +421,34 @@ def clean_line(line):
     return re.sub(r"\s+", " ", line).strip()
 
 
-def split_lines(text):
+def is_heading_or_structure(line):
+    if re.match(r"^(chapter|section|figure|table|references|bibliography)\b", line, re.I):
+        return True
+    if re.match(r"^\d+(\.\d+)*\s+[A-Z]", line):
+        return True
+    if line.startswith("|") or line.count("|") >= 2:
+        return True
+    if line.startswith("![") or "attachment:" in line:
+        return True
+    return False
+
+
+def split_lines(text, min_length=MIN_LINE_LENGTH, skip_structure=True, max_lines=None):
     lines = []
+    in_references = False
 
     for line_number, raw_line in enumerate(text.splitlines(), start=1):
         line = clean_line(raw_line)
-        if len(line) >= MIN_LINE_LENGTH:
+        if re.match(r"^(references|bibliography|works cited)\b", line, re.I):
+            in_references = True
+        if in_references:
+            continue
+        if skip_structure and is_heading_or_structure(line):
+            continue
+        if len(line) >= min_length:
             lines.append((line_number, line))
+        if max_lines and len(lines) >= max_lines:
+            break
 
     return lines
 
@@ -512,6 +540,14 @@ def explain_match(match):
     )
 
 
+def classify_match(match):
+    if match["exact_phrase_found"] or match["score"] >= 0.9:
+        return "Rewrite required"
+    if match["score"] >= 0.78 or len(match["matched_words"]) >= 8:
+        return "Citation needed"
+    return "Editor review"
+
+
 def search_line(line, max_results):
     query = f'"{line}"'
 
@@ -542,12 +578,13 @@ def search_line(line, max_results):
                     "exact_phrase_found": exact_phrase_found,
                 }
             )
+            matches[-1]["review_label"] = classify_match(matches[-1])
 
     return matches
 
 
-def check_plagiarism(text, max_results):
-    checked_lines = split_lines(text)
+def check_plagiarism(text, max_results, min_length=MIN_LINE_LENGTH, max_lines=None):
+    checked_lines = split_lines(text, min_length=min_length, skip_structure=True, max_lines=max_lines)
     report = []
 
     progress = st.progress(0)
@@ -587,6 +624,30 @@ def report_score(report):
     return round((matched_lines / len(report)) * 100)
 
 
+def publication_readiness(report):
+    similarity = report_score(report)
+    rewrite_required = sum(
+        1
+        for item in report
+        for match in item["matches"]
+        if match.get("review_label") == "Rewrite required"
+    )
+    citation_needed = sum(
+        1
+        for item in report
+        for match in item["matches"]
+        if match.get("review_label") == "Citation needed"
+    )
+    score = max(0, 100 - similarity - (rewrite_required * 8) - (citation_needed * 3))
+    if score >= 85:
+        label = "Ready after normal editorial review"
+    elif score >= 65:
+        label = "Needs citation and wording review"
+    else:
+        label = "Not publication-ready yet"
+    return score, label
+
+
 def build_csv_report(report):
     output = StringIO()
     writer = csv.writer(output)
@@ -601,6 +662,7 @@ def build_csv_report(report):
             "source_title",
             "source_url",
             "similarity_score",
+            "editorial_label",
             "snippet",
             "search_note",
         ]
@@ -608,7 +670,7 @@ def build_csv_report(report):
 
     for item in report:
         if not item["matches"]:
-            writer.writerow([item["line_number"], "No match found", item["line"], "", "", "", "", "", "", "", item.get("search_error", "")])
+            writer.writerow([item["line_number"], "No match found", item["line"], "", "", "", "", "", "", "", "", item.get("search_error", "")])
             continue
 
         for match in item["matches"]:
@@ -623,6 +685,7 @@ def build_csv_report(report):
                     match["title"],
                     match["url"],
                     match["score"],
+                    match.get("review_label", "Editor review"),
                     match["snippet"],
                     item.get("search_error", ""),
                 ]
@@ -678,10 +741,12 @@ def build_corrected_docx(original_text, report):
 
     matched_items = [item for item in report if item["matches"]]
     api_enabled = bool(get_openai_api_key() and OpenAI is not None)
+    readiness_score, readiness_label = publication_readiness(report)
 
     doc.add_paragraph(f"Lines checked: {len(report)}")
-    doc.add_paragraph(f"Lines with possible plagiarism: {len(matched_items)}")
-    doc.add_paragraph(f"Possible plagiarism score: {report_score(report)}%")
+    doc.add_paragraph(f"Lines with similarity matches: {len(matched_items)}")
+    doc.add_paragraph(f"Similarity score: {report_score(report)}%")
+    doc.add_paragraph(f"Publication readiness: {readiness_score}% - {readiness_label}")
 
     if api_enabled:
         doc.add_paragraph(
@@ -720,10 +785,10 @@ def build_corrected_docx(original_text, report):
             doc.add_paragraph(raw_line)
 
     doc.add_page_break()
-    doc.add_heading("Plagiarism Review Notes", level=2)
+    doc.add_heading("Publication Similarity Review Notes", level=2)
 
     if not matched_items:
-        doc.add_paragraph("No possible source matches were found for the checked lines.")
+        doc.add_paragraph("No source similarity matches were found for the checked lines.")
     else:
         for item in matched_items:
             doc.add_heading(f"Line {item['line_number']}", level=3)
@@ -731,6 +796,7 @@ def build_corrected_docx(original_text, report):
             for match in item["matches"][:3]:
                 doc.add_paragraph(f"Source: {match['title']}")
                 doc.add_paragraph(f"URL: {match['url']}")
+                doc.add_paragraph(f"Editorial label: {match.get('review_label', 'Editor review')}")
                 doc.add_paragraph(f"Matched words: {', '.join(match['matched_words'])}")
                 doc.add_paragraph(f"Similarity score: {match['score']}")
 
@@ -742,13 +808,15 @@ def build_corrected_docx(original_text, report):
 def render_report(report, original_text):
     plagiarized = [item for item in report if item["matches"]]
     score = report_score(report)
+    readiness_score, readiness_label = publication_readiness(report)
 
-    st.subheader("Review Summary")
+    st.subheader("Publication Similarity Summary")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     col1.metric("Lines checked", len(report))
-    col2.metric("Lines with possible matches", len(plagiarized))
-    col3.metric("Possible plagiarism score", f"{score}%")
+    col2.metric("Lines with source similarity", len(plagiarized))
+    col3.metric("Similarity score", f"{score}%")
+    col4.metric("Publication readiness", f"{readiness_score}%")
 
     st.download_button(
         "Download CSV report",
@@ -792,13 +860,13 @@ def render_report(report, original_text):
         )
 
     if score >= 50:
-        st.error("High number of possible matches found. Review the red lines and source links carefully.")
+        st.error(f"{readiness_label}. Review the red lines, source links, citations, and rewriting notes.")
     elif score > 0:
-        st.warning("Some possible matches were found. Check the highlighted lines before submitting your work.")
+        st.warning(f"{readiness_label}. Some source similarity was found; review before submission.")
     else:
-        st.success("No possible source matches were found for the checked lines.")
+        st.success(f"{readiness_label}. No source similarity matches were found for the checked lines.")
 
-    st.subheader("Line-by-line Review")
+    st.subheader("Editor Line-by-line Review")
 
     if not report:
         st.info("No long enough lines found to check.")
@@ -806,7 +874,8 @@ def render_report(report, original_text):
 
     for item in report:
         found = bool(item["matches"])
-        label = "Possible plagiarism found" if found else "No match found"
+        labels = sorted({match.get("review_label", "Editor review") for match in item["matches"]})
+        label = ", ".join(labels) if found else "No similarity match"
         card_class = "plag-card" if found else "clean-card"
         line_class = "copied-line" if found else "clean-line"
         badge_class = "badge-danger" if found else "badge-clean"
@@ -852,6 +921,7 @@ def render_report(report, original_text):
                 word_chips = "".join(f'<span class="word-chip">{escape(word)}</span>' for word in match["matched_words"])
                 exact_label = "Exact phrase found in snippet" if match["exact_phrase_found"] else "Similar words found in source"
                 explanation = explain_match(match)
+                review_label = match.get("review_label", "Editor review")
 
                 st.markdown(
                     f"""
@@ -860,9 +930,10 @@ def render_report(report, original_text):
                         {source_link}
                         <div class="visible-url">{visible_url}</div>
                         <div class="score-pill">Similarity score: {match['score']}</div>
+                        <div class="score-pill">Editorial label: {escape(review_label)}</div>
                         <div class="score-pill">{escape(exact_label)}</div>
                         <div class="source-explanation">
-                            <strong>Why this may be plagiarism:</strong><br>
+                            <strong>Why this needs publication review:</strong><br>
                             {escape(explanation)}
                         </div>
                         <div class="source-location">
@@ -889,14 +960,14 @@ def main():
             <div class="hero-kicker">Source Evidence Review</div>
             <h1>Plagiarism Source Finder</h1>
             <p class="help-text">
-                Upload a file or paste text to find possible copied lines, see the matching source links,
-                and understand exactly which words triggered each result.
+                Pre-publication similarity screening for book chapters and manuscripts. Find source overlap,
+                review citation risks, and export an editor-ready DOCX before submission.
             </p>
             <div class="feature-strip">
-                <span class="feature-chip">Checks every line</span>
+                <span class="feature-chip">Publisher-style similarity review</span>
                 <span class="feature-chip">Shows source URLs</span>
-                <span class="feature-chip">Highlights matched words</span>
-                <span class="feature-chip">Explains each flag</span>
+                <span class="feature-chip">Skips references and tables</span>
+                <span class="feature-chip">Labels citation risks</span>
                 <span class="feature-chip">Exports corrected DOCX</span>
                 <span class="feature-chip">Exports CSV report</span>
             </div>
@@ -914,16 +985,17 @@ def main():
             uploaded_file = st.file_uploader("Upload a file", type=["txt", "pdf", "docx"])
 
         with right:
-            max_results = st.slider("Search results per line", min_value=1, max_value=5, value=3)
+            scan_mode = st.selectbox("Publication scan mode", list(SCAN_MODES.keys()), index=1)
+            mode_settings = SCAN_MODES[scan_mode]
+            max_results = mode_settings["max_results"]
             st.markdown(
-                """
+                f"""
                 <div class="control-help">
-                    <strong>What does this mean?</strong><br>
-                    For every line in your text, the app checks this many web search results.
+                    <strong>{escape(scan_mode)}</strong><br>
+                    Checks up to <strong>{max_results}</strong> source results per line and reviews up to
+                    <strong>{mode_settings["max_lines"]}</strong> manuscript lines.
                     <br><br>
-                    <strong>1</strong> = faster but fewer sources checked<br>
-                    <strong>3</strong> = best default for normal checking<br>
-                    <strong>5</strong> = slower but checks more possible sources
+                    Publisher workflows use similarity reports as editorial evidence, not automatic proof of plagiarism.
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -945,35 +1017,36 @@ def main():
                 st.warning("Please upload a file or paste some text first.")
                 return
 
-            report = check_plagiarism(text, max_results=max_results)
+            report = check_plagiarism(
+                text,
+                max_results=max_results,
+                min_length=mode_settings["min_length"],
+                max_lines=mode_settings["max_lines"],
+            )
             render_report(report, text)
 
     with guidance_tab:
         st.markdown(
             """
             <div class="guide-panel">
-                <strong>What is plagiarism?</strong>
-                Plagiarism means using someone else's words, ideas, or structure without giving proper credit.
-                In this app, a red result means the line may need a citation, quotation marks, rewriting, or review.
+                <strong>How publishers use similarity checks</strong><br>
+                Publishers usually screen manuscripts for text similarity, then editors decide whether the overlap is
+                plagiarism, missing citation, text recycling, or harmless common wording.
                 <br><br>
-                <strong>Red lines</strong> mean the checker found a possible source match.
+                <strong>Rewrite required</strong> means the line appears very close to a source and should be rewritten,
+                quoted, or cited before submission.
                 <br><br>
-                <strong>Green lines</strong> mean no likely web source was found for that line.
+                <strong>Citation needed</strong> means the idea or wording may be source-dependent and should be checked
+                against the source link.
                 <br><br>
-                <strong>Open source link</strong> takes you to the page where matching text or matching words were found.
-                The full URL is also shown below the link.
+                <strong>Editor review</strong> means some similarity was found, but it may be common terminology or
+                acceptable overlap.
                 <br><br>
-                <strong>Highlighted source words</strong> show which words from your line also appeared
-                in the source title or preview.
+                <strong>Skipped content</strong> includes headings, tables, image artifacts, and references, because
+                these often inflate similarity scores in book chapters.
                 <br><br>
-                <strong>Why this may be plagiarism</strong> explains the evidence for each result, including exact phrase
-                matches, matched words, and similarity score.
-                <br><br>
-                <strong>Search notes</strong> are not counted as plagiarism. They only mean the search provider
-                returned no result or had a temporary lookup issue.
-                <br><br>
-                <strong>Similarity score</strong> is a rough match score from <code>0</code> to <code>1</code>.
-                A higher score means the source preview is closer to the checked line.
+                <strong>Publication readiness</strong> is a practical risk score for revision planning. It is not a
+                publisher certificate or an iThenticate replacement.
                 <br><br>
                 <strong>Corrected DOCX</strong> creates a new Word document. If an OpenAI API key is configured
                 in Streamlit secrets, flagged lines are rewritten. If not, the document marks each flagged line
